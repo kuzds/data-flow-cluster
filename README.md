@@ -8,6 +8,12 @@
 Spring Cloud + Spring Admin + Spring Cloud Config  
 H2 database?
 
+`eureka-server`:
+- ...
+
+`api-gateway`:
+- ...
+
 `bare-db2web`:
 - SOAP producer
 
