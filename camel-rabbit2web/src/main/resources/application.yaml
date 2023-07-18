@@ -1,0 +1,25 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: camel-rabbit2web
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    virtual-host: ${RABBITMQ_VHOST}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+# turn on auto declare so the exchange, queues are automatic created if not already present in rabbitmq broker
+camel:
+  component:
+    spring-rabbitmq:
+      auto-declare: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${random.uuid}

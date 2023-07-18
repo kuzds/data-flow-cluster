@@ -7,7 +7,7 @@
 ## Technological stack for services:
 Spring Cloud + Spring Admin + Spring Cloud Config  
 H2 database?
-
+swagger ?
 `eureka-server`:
 - ...
 
@@ -16,6 +16,7 @@ H2 database?
 
 `bare-db2web`:
 - SOAP producer
+- Feign REST client
 
 `bare-web2active`:
 - SOAP consumer

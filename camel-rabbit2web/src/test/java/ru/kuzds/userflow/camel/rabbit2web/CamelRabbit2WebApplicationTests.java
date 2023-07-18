@@ -1,10 +1,10 @@
-package ru.kuzds.userflow.camel.active2web;
+package ru.kuzds.userflow.camel.rabbit2web;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CamelActive2webApplicationTests {
+class CamelRabbit2WebApplicationTests {
 
 	@Test
 	void contextLoads() {
