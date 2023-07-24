@@ -2,7 +2,7 @@
 
 
 ## Workflow
-![process.png](process.png)
+![process.png](.assets/process.png)
 
 ## Technological stack for services:
 Spring Cloud + Spring Admin + Spring Cloud Config  

@@ -1,4 +1,4 @@
-package ru.kuzds.userflow.camel.rabbit2web;
+package ru.kuzds.userflow.bare.web2active;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 //@EnableEurekaClient
-public class CamelRabbit2webApplication {
+public class BareWeb2activeApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CamelRabbit2webApplication.class, args);
+		SpringApplication.run(BareWeb2activeApplication.class, args);
 	}
-
 }

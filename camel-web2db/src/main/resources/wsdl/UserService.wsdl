@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:tns="http://www.kuzds.ru/userflow/userservice"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Users"
+                  targetNamespace="http://www.kuzds.ru/userflow/userservice">
+
+    <!--
+        The `types` element defines the data types (XML elements)
+        that are used by the web service.
+     -->
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:import namespace="http://www.kuzds.ru/userflow/userservice" schemaLocation="UserService.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!--
+        A wsdl `message` element is used to define a message
+        exchanged between a web service, consisting of zero
+        or more `part`s.
+     -->
+    <wsdl:message name="SaveUserRequest">
+        <wsdl:part  name="saveUserRequest" element="tns:SaveUserRequest"/>
+    </wsdl:message>
+    <wsdl:message name="SaveUserResponse">
+        <wsdl:part name="saveUserResponse" element="tns:SaveUserResponse"/>
+    </wsdl:message>
+
+    <!--
+        A WSDL `portType` is used to combine multiple `message`s
+        (e.g. input, output) into a single operation.
+
+        Here we define three synchronous (input/output) operations
+        and the `message`s that must be used for each.
+     -->
+    <wsdl:portType name="UserServicePortType">
+        <wsdl:operation name="SaveUser">
+            <wsdl:input message="tns:SaveUserRequest"/>
+            <wsdl:output message="tns:SaveUserResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!--
+        The `binding` element defines exactly how each
+        `operation` will take place over the network.
+        In this case, we are using SOAP.
+     -->
+    <wsdl:binding name="UserBinding" type="tns:UserServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="SaveUser">
+            <soap:operation soapAction="http://www.kuzds.ru/userflow/userservice/SaveUser"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!--
+        The `service` element finally says where the service
+        can be accessed from - in other words, its endpoint.
+     -->
+    <wsdl:service name="UserService">
+        <wsdl:port name="UserPort" binding="tns:UserBinding">
+            <soap:address location="http://localhost:8080/cxf/user"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.kuzds.ru/userflow/userservice"
+            targetNamespace="http://www.kuzds.ru/userflow/userservice" elementFormDefault="qualified">
+
+    <xsd:element name="User">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="id" type="xsd:int"/>
+                <xsd:element name="email" type="xsd:string"/>
+                <xsd:element name="transferType" type="TransferType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="TransferType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="REST"/>
+            <xsd:enumeration value="SOAP"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:element name="SaveUserRequest">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="User"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="SaveUserResponse">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="User"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

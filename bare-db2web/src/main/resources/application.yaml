@@ -1,9 +1,9 @@
 server:
-  port: 5555
+  port: 2222
 
 spring:
   application:
-    name: camel-web2db
+    name: bare-db2web
   datasource:
     url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
@@ -15,7 +15,6 @@ spring:
 #    hibernate:
 #      ddl-auto: update
 
-
 eureka:
   client:
     service-url:
@@ -23,10 +22,3 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${random.uuid}
 
-#By default, the path for cxf is: /services. Overriding the default path
-cxf:
-  path: /cxf
-
-camel:
-  rest:
-    context-path: /rest

@@ -1,0 +1,3 @@
+@NAME(insertUser)
+    INSERT INTO READY_USER (EMAIL, TRANSFER_TYPE)
+    VALUES(:${body.user.email}, :${body.user.transferType.toString});

@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 4444
 
 spring:
   application:
@@ -23,3 +23,8 @@ eureka:
       defaultZone: http://localhost:8761/eureka
   instance:
     instance-id: ${spring.application.name}:${random.uuid}
+
+#soap.service.base.url: /my-foo-api
+#cxf.servicelist.title: Extremely customized List-Title
+#soap.messages.logging: true
+#soap.messages.extract: true
