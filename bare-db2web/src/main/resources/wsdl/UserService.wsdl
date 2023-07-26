@@ -65,7 +65,7 @@
      -->
     <wsdl:service name="UserService">
         <wsdl:port name="UserPort" binding="tns:UserBinding">
-            <soap:address location="http://localhost:8080/cxf/user"/>
+            <soap:address location="http://localhost:8080/cxf/UserService"/>
         </wsdl:port>
     </wsdl:service>
 

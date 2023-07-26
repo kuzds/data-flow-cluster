@@ -3,12 +3,14 @@ package ru.kuzds.userflow.camel.rabbit2web.route;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 import ru.kuzds.userflow.camel.rabbit2web.mapper.UserMapper;
 import ru.kuzds.userflow.userservice.SaveUserResponse;
 import ru.kuzds.userflow.userservice.User;
+import ru.kuzds.userflow.userservice.UserServicePortType;
 
 @Component
 @RequiredArgsConstructor
@@ -31,6 +33,14 @@ public class Rabbit2webRoute extends RouteBuilder {
 
     @Override
     public void configure() {
+//        // XML Data Format
+//        JaxbDataFormat xmlDataFormat = new JaxbDataFormat();
+//        JAXBContext con = JAXBContext.newInstance(Employee.class);
+//        xmlDataFormat.setContext(con);
+
+        // JSON Data Format
+        JacksonDataFormat jsonDataFormat = new JacksonDataFormat(SaveUserResponse.class);
+
         from(RABBITMQ)
             .unmarshal(new JacksonDataFormat(User.class))
             .choice()
@@ -50,14 +60,22 @@ public class Rabbit2webRoute extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant("POST"))
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
             .to(REST_URL)
-//            .unmarshal().json(JsonLibrary.Jackson, true)
-            .unmarshal(new JacksonDataFormat(SaveUserResponse.class))
+//            .process(exchange -> {
+//                Object body = exchange.getIn().getBody();
+//                log.info(body.toString());
+//            })
+            .unmarshal(jsonDataFormat)
             .log("User sent using ${body.user.transferType}")
         ;
 
         from(DR_TO_SOAP).routeId("to-soap")
             .bean(userMapper, "toSaveUserRequest")
             .log("Sending using ${body.user.transferType} body=${body}")
+            .removeHeaders("*")
+            .setHeader(CxfConstants.OPERATION_NAME, constant("SaveUser"))
+            .toF("cxf://%s?serviceClass=%s", "http://localhost:5555/cxf/UserService", UserServicePortType.class.getName())
+            .convertBodyTo(SaveUserResponse.class)
+            .log("User sent using ${body.user.transferType}")
         ;
     }
 }
