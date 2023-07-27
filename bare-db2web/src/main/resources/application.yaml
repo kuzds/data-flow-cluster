@@ -1,19 +1,21 @@
 server:
-  port: 2222
+  port: 0
 
 spring:
   application:
-    name: bare-db2web
+    name: ${BARE_DB2WEB_NAME}
   datasource:
     url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-  jpa:
-    open-in-view: off
-    show-sql: true
+#  jpa:
+#    open-in-view: off
+#    show-sql: true
 #    hibernate:
 #      ddl-auto: update
+  config:
+    import: configserver:http://localhost:8888
 
 eureka:
   client:
@@ -22,3 +24,5 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${random.uuid}
 
+userflow:
+  target-service-name: ${BARE_WEB2RABBIT_NAME}

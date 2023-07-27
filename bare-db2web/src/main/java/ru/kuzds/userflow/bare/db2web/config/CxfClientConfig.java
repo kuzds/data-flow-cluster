@@ -1,8 +1,11 @@
 package ru.kuzds.userflow.bare.db2web.config;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.logging.FaultListener;
 import org.apache.cxf.message.Message;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.kuzds.userflow.userservice.UserServicePortType;
@@ -14,21 +17,17 @@ import java.util.Map;
 public class CxfClientConfig {
 
     // https://docs.spring.io/spring-cloud-netflix/docs/current/reference/html/#using-the-eurekaclient
-//    @Autowired
-//    private EurekaClient discoveryClient;
-//
-//    public String serviceUrl() {
-//        InstanceInfo instance = discoveryClient.getNextServerFromEureka("STORES", false);
-//        return instance.getHomePageUrl();
-//    }
 
-    private final static String address = "http://localhost:3333/cxf/UserService";
+    @Value("${userflow.target-service-name}")
+    private String targetServiceName;
 
     @Bean
-    public UserServicePortType userServiceProxy() {
+    public UserServicePortType userServiceProxy(EurekaClient eurekaClient) {
+        InstanceInfo instance = eurekaClient.getNextServerFromEureka(targetServiceName, false);
+
         JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
         jaxWsProxyFactoryBean.setServiceClass(UserServicePortType.class);
-        jaxWsProxyFactoryBean.setAddress(address);
+        jaxWsProxyFactoryBean.setAddress(instance.getHomePageUrl() + "/cxf/UserService");
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("org.apache.cxf.logging.FaultListener", new MyFaultListener());

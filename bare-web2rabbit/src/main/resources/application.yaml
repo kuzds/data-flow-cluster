@@ -3,17 +3,13 @@ server:
 
 spring:
   application:
-    name: ${CAMEL_WEB2DB_NAME}
-  datasource:
-    url: ${DB_URL}
-    driver-class-name: org.postgresql.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    open-in-view: off
-    show-sql: true
-#    hibernate:
-#      ddl-auto: update
+    name: ${BARE_WEB2RABBIT_NAME}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    virtual-host: ${RABBITMQ_VHOST}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   config:
     import: configserver:http://localhost:8888
 
@@ -27,7 +23,3 @@ eureka:
 #By default, the path for cxf is: /services. Overriding the default path
 cxf:
   path: /cxf
-
-camel:
-  rest:
-    context-path: /rest

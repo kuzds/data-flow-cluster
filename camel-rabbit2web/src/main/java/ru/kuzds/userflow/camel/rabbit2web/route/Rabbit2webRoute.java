@@ -1,11 +1,14 @@
 package ru.kuzds.userflow.camel.rabbit2web.route;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.kuzds.userflow.camel.rabbit2web.mapper.UserMapper;
 import ru.kuzds.userflow.userservice.SaveUserResponse;
@@ -27,9 +30,12 @@ public class Rabbit2webRoute extends RouteBuilder {
 
     public static final String DR_TO_REST = "direct:to-rest";
     public static final String DR_TO_SOAP = "direct:to-soap";
-    public static final String REST_URL = "http://localhost:5555/rest/user";
 
-    public final UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final EurekaClient eurekaClient;
+
+    @Value("${userflow.target-service-name}")
+    private String targetServiceName;
 
     @Override
     public void configure() {
@@ -40,6 +46,11 @@ public class Rabbit2webRoute extends RouteBuilder {
 
         // JSON Data Format
         JacksonDataFormat jsonDataFormat = new JacksonDataFormat(SaveUserResponse.class);
+
+        InstanceInfo instance = eurekaClient.getNextServerFromEureka(targetServiceName, false);
+
+        String restUrl = instance.getHomePageUrl() + "rest/user";
+        String cxfUrl = instance.getHomePageUrl() + "cxf/UserService";
 
         from(RABBITMQ)
             .unmarshal(new JacksonDataFormat(User.class))
@@ -59,7 +70,7 @@ public class Rabbit2webRoute extends RouteBuilder {
             .removeHeader("*")
             .setHeader(Exchange.HTTP_METHOD, constant("POST"))
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-            .to(REST_URL)
+            .to(restUrl)
 //            .process(exchange -> {
 //                Object body = exchange.getIn().getBody();
 //                log.info(body.toString());
@@ -73,7 +84,7 @@ public class Rabbit2webRoute extends RouteBuilder {
             .log("Sending using ${body.user.transferType} body=${body}")
             .removeHeaders("*")
             .setHeader(CxfConstants.OPERATION_NAME, constant("SaveUser"))
-            .toF("cxf://%s?serviceClass=%s", "http://localhost:5555/cxf/UserService", UserServicePortType.class.getName())
+            .toF("cxf://%s?serviceClass=%s", cxfUrl, UserServicePortType.class.getName())
             .convertBodyTo(SaveUserResponse.class)
             .log("User sent using ${body.user.transferType}")
         ;

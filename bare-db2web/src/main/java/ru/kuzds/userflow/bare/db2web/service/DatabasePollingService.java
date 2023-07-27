@@ -46,7 +46,7 @@ public class DatabasePollingService {
                     continue;
                 }
             } catch (Throwable e) {
-                log.error("Could not send {} to 'bare-web2active' using {}", user, transferType);
+                log.error("Could not send {} to 'bare-web2rabbit' using {}", user, transferType);
                 continue;
             }
 
