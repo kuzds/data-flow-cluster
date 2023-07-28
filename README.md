@@ -1,9 +1,10 @@
 # User Flow Cluster
-This cluster contains 4 chained business services. Workflow:
+Cluster contains 4 chained business services and Spring Cloud Eureka/Config services.   
+User objects, saved in table `new_user` go through chain and save in table `ready_user`  
+Workflow:
 ![process.png](.assets/process.png)
 
 ## Technological stack for services:
-Spring Cloud + Spring Admin + Spring Cloud Config  
 
 `eureka-server`:
 - Spring Cloud Eureka Server
@@ -13,30 +14,39 @@ Spring Cloud + Spring Admin + Spring Cloud Config
 
 `bare-db2web`:
 - Spring Cloud Eureka/Config Client
-- SOAP producer
-- Feign REST client
+- Openfeign REST client
+- CXF Framework/CodegenPlugin
+- PostgreSQL / Flyway / Spring Data JPA
+
 
 `bare-web2rabbit`:
 - Spring Cloud Eureka/Config Client
-- SOAP consumer
+- Rest controller
+- CXF Framework/CodegenPlugin
+- RabbitMQ starter
 
 `camel-rabbit2web`:
 - Spring Cloud Eureka/Config Client
-- Camel
+- Apache Camel
+- RabbitMQ starter
+- REST client
+- CXF Framework/CodegenPlugin
 
 `camel-web2db`:
 - Spring Cloud Eureka/Config Client
-- Camel
+- Apache Camel
+- REST controller
+- CXF Framework/CodegenPlugin
+- ElSql
 
 ## Local development
 
-1. `config-server`: set RabbitMQ and PostgreSQL properties in `/resources/configs/*.yaml` files
+1. Run RabbitMQ and PostgreSQL
+2. `config-server`: set RabbitMQ and PostgreSQL properties in `/resources/configs/*.yaml` files
+3. Run order `config-server` -> `eureka-server` -> `bare-web2rabbit` -> `bare-db2web` -> `camel-web2db` -> `camel-rabbit2web`
 
 ## Additional Info
 
 `config-server`:  
-Config Server REST endpoints: 
-- localhost:8888/bare-db2web/default
-- localhost:8888/bare-web2rabbit/default
-- localhost:8888/camel-rabbit2web/default
-- localhost:8888/camel-web2db/default
+Config Server REST endpoint: 
+- GET localhost:8888/application/default

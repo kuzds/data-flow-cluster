@@ -18,4 +18,8 @@ public class UserMapper {
         request.setUser(user);
         return request;
     }
+
+    public String toString(User user) {
+        return String.format("User{id=%d, email='%s', transferType=%s}", user.getId(), user.getEmail(), user.getTransferType());
+    }
 }

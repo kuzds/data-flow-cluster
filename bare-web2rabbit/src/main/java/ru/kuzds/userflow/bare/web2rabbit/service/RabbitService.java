@@ -14,9 +14,6 @@ import ru.kuzds.userflow.userservice.User;
 @RequiredArgsConstructor
 public class RabbitService {
 
-    public final static String EXCHANGE_NAME = "user.flow.cluster.exchange";
-    public final static String ROUTING_KEY = "user.flow.cluster.queue";
-
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
 
@@ -29,6 +26,6 @@ public class RabbitService {
             throw new RuntimeException(e);
         }
 
-        rabbitTemplate.send(EXCHANGE_NAME, ROUTING_KEY, new Message(body));
+        rabbitTemplate.send(new Message(body));
     }
 }

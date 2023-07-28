@@ -11,6 +11,7 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.kuzds.userflow.camel.rabbit2web.mapper.UserMapper;
+import ru.kuzds.userflow.userservice.SaveUserRequest;
 import ru.kuzds.userflow.userservice.SaveUserResponse;
 import ru.kuzds.userflow.userservice.User;
 import ru.kuzds.userflow.userservice.UserServicePortType;
@@ -19,17 +20,9 @@ import ru.kuzds.userflow.userservice.UserServicePortType;
 @RequiredArgsConstructor
 public class Rabbit2webRoute extends RouteBuilder {
 
-    public final static String EXCHANGE_NAME = "user.flow.cluster.exchange";
-    public final static String ROUTING_KEY = "user.flow.cluster.queue";
-    public final static String RABBITMQ = String.format(
-        "spring-rabbitmq:%s?" +
-            "routingKey=%s&" +
-            "arg.queue.autoDelete=true", EXCHANGE_NAME, ROUTING_KEY
-    ); // ?autoDeclare=true
-
-
     public static final String DR_TO_REST = "direct:to-rest";
     public static final String DR_TO_SOAP = "direct:to-soap";
+    public static final String DR_LOG = "direct:log-user";
 
     private final UserMapper userMapper;
     private final EurekaClient eurekaClient;
@@ -37,22 +30,27 @@ public class Rabbit2webRoute extends RouteBuilder {
     @Value("${userflow.target-service-name}")
     private String targetServiceName;
 
+    @Value("${userflow.rabbitmq.exchange}")
+    private String rabbitmqExchange;
+
+    @Value("${userflow.rabbitmq.routing-key}")
+    private String rabbitmqRoutingKey;
+
     @Override
     public void configure() {
-//        // XML Data Format
-//        JaxbDataFormat xmlDataFormat = new JaxbDataFormat();
-//        JAXBContext con = JAXBContext.newInstance(Employee.class);
-//        xmlDataFormat.setContext(con);
 
-        // JSON Data Format
-        JacksonDataFormat jsonDataFormat = new JacksonDataFormat(SaveUserResponse.class);
+        String rabbitmq = String.format(
+            "spring-rabbitmq:%s?" +
+                "routingKey=%s&" +
+                "arg.queue.autoDelete=true", rabbitmqExchange, rabbitmqRoutingKey
+        ); // ?autoDeclare=true
 
         InstanceInfo instance = eurekaClient.getNextServerFromEureka(targetServiceName, false);
 
         String restUrl = instance.getHomePageUrl() + "rest/user";
         String cxfUrl = instance.getHomePageUrl() + "cxf/UserService";
 
-        from(RABBITMQ)
+        from(rabbitmq).routeId("from-rabbitmq")
             .unmarshal(new JacksonDataFormat(User.class))
             .choice()
                 .when(simple("${body.transferType} == 'REST'"))
@@ -66,27 +64,28 @@ public class Rabbit2webRoute extends RouteBuilder {
 
         from(DR_TO_REST).routeId("to-rest")
             .bean(userMapper, "toSaveUserRequest")
+            .wireTap(DR_LOG)
             .marshal().json(JsonLibrary.Jackson, true)
             .removeHeader("*")
             .setHeader(Exchange.HTTP_METHOD, constant("POST"))
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
             .to(restUrl)
-//            .process(exchange -> {
-//                Object body = exchange.getIn().getBody();
-//                log.info(body.toString());
-//            })
-            .unmarshal(jsonDataFormat)
-            .log("User sent using ${body.user.transferType}")
+            .unmarshal(new JacksonDataFormat(SaveUserResponse.class))
         ;
 
         from(DR_TO_SOAP).routeId("to-soap")
             .bean(userMapper, "toSaveUserRequest")
-            .log("Sending using ${body.user.transferType} body=${body}")
+            .wireTap(DR_LOG)
             .removeHeaders("*")
             .setHeader(CxfConstants.OPERATION_NAME, constant("SaveUser"))
             .toF("cxf://%s?serviceClass=%s", cxfUrl, UserServicePortType.class.getName())
             .convertBodyTo(SaveUserResponse.class)
-            .log("User sent using ${body.user.transferType}")
+        ;
+
+        from(DR_LOG).routeId("log-user")
+            .validate(body().isInstanceOf(SaveUserRequest.class))
+            .bean(userMapper, "toString")
+            .log("Sending ${body}")
         ;
     }
 }

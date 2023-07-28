@@ -9,7 +9,6 @@ import ru.kuzds.userflow.bare.db2web.repository.NewUserRepository;
 import ru.kuzds.userflow.bare.db2web.repository.entity.NewUser;
 import ru.kuzds.userflow.bare.db2web.rest.client.UserRestClient;
 import ru.kuzds.userflow.userservice.SaveUserRequest;
-import ru.kuzds.userflow.userservice.SaveUserResponse;
 import ru.kuzds.userflow.userservice.TransferType;
 import ru.kuzds.userflow.userservice.UserServicePortType;
 
@@ -29,28 +28,28 @@ public class DatabasePollingService {
     public void pollDatabase() {
 
         List<NewUser> users = repository.findAll();
-        log.info(users.toString());
+        log.info("Retrieved from database: {}", users);
 
         for (NewUser user : users) {
             SaveUserRequest request = userMapper.toDto(user);
+            String userString = userMapper.toString(request.getUser());
             TransferType transferType = user.getTransferType();
 
-            SaveUserResponse response;
             try {
                 if (transferType == TransferType.REST) {
-                    response = userRestClient.saveUser(request);
+                    userRestClient.saveUser(request);
                 } else if (transferType == TransferType.SOAP) {
-                    response = userServiceProxy.saveUser(request);
+                    userServiceProxy.saveUser(request);
                 } else {
                     log.warn("User discarded due to incorrect transferType. Use 'REST' or 'SOAP' values");
                     continue;
                 }
             } catch (Throwable e) {
-                log.error("Could not send {} to 'bare-web2rabbit' using {}", user, transferType);
+                log.error("Could not send {}", userString);
                 continue;
             }
 
-            log.info("User sent using {}; Received response with changed user id={}", transferType, response.getUser().getId());
+            log.info("Sent {}", userString);
 //            repository.delete(user);
         }
     }

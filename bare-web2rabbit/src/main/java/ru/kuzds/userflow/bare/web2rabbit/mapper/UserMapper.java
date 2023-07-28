@@ -1,4 +1,4 @@
-package ru.kuzds.userflow.camel.web2db.mapper;
+package ru.kuzds.userflow.bare.web2rabbit.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.kuzds.userflow.userservice.SaveUserRequest;
@@ -12,10 +12,6 @@ public class UserMapper {
         SaveUserResponse response = new SaveUserResponse();
         response.setUser(request.getUser());
         return response;
-    }
-
-    public String toString(SaveUserRequest request) {
-        return toString(request.getUser());
     }
 
     public String toString(User user) {
