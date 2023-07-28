@@ -1,6 +1,6 @@
 # User Flow Cluster
 Cluster contains 4 chained business services and Spring Cloud Eureka/Config services.   
-User objects, saved in table `new_user` go through chain and save in table `ready_user`  
+User objects stored in the `new_user` table are passed throught chain and stored in the `ready_user` table.
 Workflow:
 ![process.png](.assets/process.png)
 
